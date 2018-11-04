@@ -1,5 +1,6 @@
 news=> select distinct path, count(*) from log group by path order by count desc limit 25;
 This give me a count of every unique entry in the path column of the log table, in desending order.
+ This view was dropped.
 --
 Now I need to eleminate non-article paths.
 --
@@ -7,7 +8,7 @@ news=> select distinct path, count(*) from log where path like '/article/%' grou
 This eleminates non-article paths.
 --
 news=> create view top3art as select distinct path, count(*) from log where path like '/article/%' group by path order by count desc limit 3;
-This create a view call top3art. Displays 2 columns: top 3 articles' paths and their counts.
+This create a view called top3art. Displays 2 columns: top 3 articles' paths and their counts.
 --
 news=> select *, replace(path,'/article/', '') from top3art;
 Removes '/article/' from path and inserts result in new column named 'replace' by default.
@@ -17,6 +18,7 @@ Same result but with 'slug' as column name.
 --
 news=> create view top3WithSlug as select *, replace(path,'/article/', '') as slug from top3art;
 Creates view with a slug column for top 3 articles.
+ This view was dropped.
 --
 news=> select title, count from articles, top3WithSlug where articles.slug = top3WithSlug.slug order by count desc;
 My final answer to Q1: Displays top 3 articles and number of views in descending order.
@@ -61,7 +63,7 @@ Views HTTP status code and date only (no time).
 news=> create view datestatOKcount as select distinct date, count(*) from statusanddate where status = '200 OK' group by date;
 Views how many times server returned status '200 OK' each day.
 --
-news=> create view datestatnotOKcount as select distinct date, count(*) from statusanddate where status != '200 OK' 
+news=> create view dateStatnotOkCount as select distinct date, count(*) from statusanddate where status != '200 OK' 
 group by date order by date;
 Views how many times server returned status NOT '200 OK' each day.
 --

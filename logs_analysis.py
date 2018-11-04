@@ -12,7 +12,7 @@ c = db.cursor()
 def top_three_articles():
     '''
     Run SQL query.
-    This query relies on 2 nested views (see README).
+    This query relies on 2 dependant views (see README).
     It returns a 2 col 3 row table with the top 3 article
     titles in 1st col and number or hits it recieved from
     the log table in descending order in the 2nd col.
@@ -29,7 +29,7 @@ def top_three_articles():
 def top_authors():
 	'''
 	Run SQL query.
-    This query relies on 3 nested views (see README).
+    This query relies on 3 dependant views (see README).
     It returns a 2 col 4 row table with the all the authors'
     names in 1st col and number or hits each of their articles
     recieved from the previous query table in descending order
@@ -47,7 +47,7 @@ def top_authors():
 def errors():
 	''' 
 	Run SQL query.
-	This query relies on 3 nested views (see README).
+	This query relies on 5 dependant views (see README).
 	It returns a 2 col 1 row table with the dates that the
 	server returned more that 1% error status codes in 1st 
 	col and percent of errors in the 2nd col.
