@@ -1,0 +1,77 @@
+news=> select distinct path, count(*) from log group by path order by count desc limit 25;
+This give me a count of every unique entry in the path column of the log table, in desending order.
+--
+Now I need to eleminate non-article paths.
+--
+news=> select distinct path, count(*) from log where path like '/article/%' group by path order by count desc limit 25;
+This eleminates non-article paths.
+--
+news=> create view top3art as select distinct path, count(*) from log where path like '/article/%' group by path order by count desc limit 3;
+This create a view call top3art. Displays 2 columns: top 3 articles' paths and their counts.
+--
+news=> select *, replace(path,'/article/', '') from top3art;
+Removes '/article/' from path and inserts result in new column named 'replace' by default.
+OR
+news=> select *, split_part(path, '/article/', 2) as slug from top3art;
+Same result but with 'slug' as column name.
+--
+news=> create view top3WithSlug as select *, replace(path,'/article/', '') as slug from top3art;
+Creates view with a slug column for top 3 articles.
+--
+news=> select title, count from articles, top3WithSlug where articles.slug = top3WithSlug.slug order by count desc;
+My final answer to Q1: Displays top 3 articles and number of views in descending order.
+--
+news=> create view topArticles as select distinct path, count(*) from log where path like '/article/%' group by path order
+ by count desc;
+Same view as top3art but with no limit.
+--
+news=> create view topArtWithSlug as select *, replace(path,'/article/', '') as slug from topArticles;
+Same view as top3WithSlugh but list all possible slugs from topArticles.
+--
+news=> select title, count from articles, topArtWithSlug where articles.slug = topartwithslug.slug order by count desc limit 3;
+A better final answer to Q1
+--
+Q2
+--
+news=> select name, title from authors, articles where authors.id = articles.author;
+Matches author name with title of article they wrote.
+--
+news=> create view authorandtitle as select name, title from authors, articles where authors.id = articles.author;
+Returns list of author names matched with title of articles they wrote.
+--
+news=> create view titleandcount as select title, count from articles, topartwithslug where articles.slug = topartwithslug
+.slug order by count desc;
+Returns list of title and number of views.
+--
+news=> select name, count from authorandtitle, titleandcount where authorandtitle.title = titleandcouunt.title;
+How many views each author got.
+--
+news=> create view authorandviews as select name, count from authorandtitle, titleandcount where authorandtitle.title = ti
+tleandcount.title order by name;
+A view for above query.
+--
+news=> select name, sum(count) from authorandviews group by name order by sum desc;
+Final answer to Q2: Gives total number of views each author got in descending order.
+--
+Q3
+--
+news=> create view statusanddate as select status, time::date as date from log;
+Views HTTP status code and date only (no time).
+--
+news=> create view datestatOKcount as select distinct date, count(*) from statusanddate where status = '200 OK' group by date;
+Views how many times server returned status '200 OK' each day.
+--
+news=> create view datestatnotOKcount as select distinct date, count(*) from statusanddate where status != '200 OK' 
+group by date order by date;
+Views how many times server returned status NOT '200 OK' each day.
+--
+news=> create view datebothstatcount as select datestatokcount.date, count_ok, count_not_ok
+from datestatokcount, datestatnotokcount where datestatokcount.date = datestatnotokcount.date;
+Views each day with number of OK and NOT OK status.
+--
+news=> create view errorratio as select date, count_ok, count_not_ok, (1.0*count_not_ok / (count_not_ok + count_ok) * 100)
+ as err_ratio from datebothstatcount;
+ Views dates, all counts and error ratio in percent.
+--
+select date, err_ratio from errorratio where err_ratio > 1.0;
+Final answer to Q3: gives date and percent error only on day where error > 1%.
