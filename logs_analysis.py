@@ -1,4 +1,4 @@
-# python 3.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import psycopg2
